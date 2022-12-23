@@ -67,17 +67,20 @@ print("Gerando Palpite")
 
 for x in tqdm(range(qtdPalpite)):
     time.sleep(0.5)
-    a = choices(base, k=1)
+    a = str(choices(base, k=1)).strip("'[]'")
+    a = int(a)
     palpite = []
     contador = 0
     if a not in palpite:
         palpite.append(a)
         while (len(palpite) < 6):
-            a = choices(base, k=1)
+            a = str(choices(base, k=1)).strip("'[]'")
+            a = int(a)
             if a not in palpite:
                 palpite.append(a)
             contador +=1
     palpites.append(sorted(palpite))
+
 
 df = {
         'Concurso':concurso,
@@ -110,3 +113,38 @@ print(100*' '  )
 
 for y in palpites:
     print(y)
+
+
+#Valição para verificar se algum palpite já foi Sorteado 
+
+todoConc = 'https://www.portalconfiraloterias.com.br/loteria/ConferirResultadoNovoJson.php?loteria=megasena&jogo=00 00 00 00 00 00&concursoIni=1&concursoFim=5000&premio=0&time=&mes='
+headers =  {"Content-Type":"application/json"}
+retorno = get(todoConc, headers)
+decoded_data = retorno.content.decode('utf-8-sig')
+data = json.loads(decoded_data)
+df2 = pd(data)
+
+#Adicionando numero sorteado a uma lista para usar em comparações
+
+lista = []
+totalsorteado = []
+
+for i in range(len(df2)):
+    lista1 = []
+    compara = str(df2['numeros'][i]).strip()
+    compara = compara.replace(' ',',')
+
+    for x in compara.split(','):
+        x= int(x)
+        lista1.append(x)
+    lista.append(lista1)
+
+for i in range(len(palpites)):
+
+    if palpites[i] in lista:
+        print('Palpite já sorteado', palpites[i] )
+        totalsorteado.append(palpites[i])
+        
+print(100*' '  )
+
+print('TOTAL DE PALPITES JÁ SORTEADOS: ',len(totalsorteado))    
