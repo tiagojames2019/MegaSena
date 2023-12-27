@@ -36,12 +36,11 @@ print("Analisando Concurso")
 
 for i in tqdm(range(conc_final-qtdAnalise, conc_final)):
     
-    time.sleep(1)
+    time.sleep(2)
 
     link = f'https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena/{i}'
     headers =  {"Content-Type":"application/json"}
     res = get(link, headers, verify=False)
-    #, "Authorization": f"Bearer {token}"
     resposta = res.json()
     sorteados.append(sorted(resposta['dezenasSorteadasOrdemSorteio']))
     sorteados_ordenados = sorted(sorteados)
@@ -51,6 +50,7 @@ for i in tqdm(range(conc_final-qtdAnalise, conc_final)):
 for x in range(1,len(sorteados)+1):
     index.append(x)
 
+#Verificando numeros Repetidos
 for i in sorteados:
     for x in i:
         if x in base:
@@ -59,14 +59,13 @@ for i in sorteados:
         else:
             base.append(x)
 
-base = sorted(base)
 
 print(100*' '  )
 
 print("Gerando Palpite")
 
 for x in tqdm(range(qtdPalpite)):
-    time.sleep(0.5)
+    time.sleep(0.01)
     a = str(choices(base, k=1)).strip("'[]'")
     a = int(a)
     palpite = []
@@ -79,7 +78,9 @@ for x in tqdm(range(qtdPalpite)):
             if a not in palpite:
                 palpite.append(a)
             contador +=1
-    palpites.append(sorted(palpite))
+    
+    if palpite not in palpites:
+        palpites.append(sorted(palpite))
 
 
 df = {
@@ -98,7 +99,7 @@ print(100*' '  )
 
 print(10*'*','BASE UTILIZADA',10*'*'  )
 
-print(base)
+print(sorted(base))
 
 print(100*' '  )
 
@@ -114,6 +115,8 @@ print(100*' '  )
 for y in palpites:
     print(y)
 
+print(100*' '  )
+print("Quantidade de Palpites Gerados :",len(palpites) )
 
 #Valição para verificar se algum palpite já foi Sorteado 
 
@@ -147,4 +150,18 @@ for i in range(len(palpites)):
         
 print(100*' '  )
 
-print('TOTAL DE PALPITES JÁ SORTEADOS: ',len(totalsorteado))    
+print('TOTAL DE PALPITES JÁ SORTEADOS: ',len(totalsorteado))  
+
+#Gerando Arquivos printando de Saidas
+
+with open('resultados.txt', 'w') as arquivo:
+
+    arquivo.write(f"Proximo concurso  = {conc_final}\n\n" )
+    arquivo.write('*****  PALPITES GERADOS *****\n')
+    
+    for linha in palpites:
+
+        arquivo.write(str(linha))
+        arquivo.write('\n')
+      
+arquivo.close()
